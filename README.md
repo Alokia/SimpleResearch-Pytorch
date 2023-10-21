@@ -5,11 +5,11 @@
 
 * [SelfAttention](https://arxiv.org/abs/1706.03762)
 
-Scaled Dot-Product Attention
-![](./figure/ScaledDotProductAttention.png)
+  * **Scaled Dot-Product Attention**
+  ![](./figure/ScaledDotProductAttention.png)
 
-Multi-Head Attention
-![](./figure/MultiHeadAttention.png)
+  * Multi-Head Attention
+  ![](./figure/MultiHeadAttention.png)
 
 ```python
 from attention.SelfAttention import ScaledDotProductAttention, MultiHeadAttention
