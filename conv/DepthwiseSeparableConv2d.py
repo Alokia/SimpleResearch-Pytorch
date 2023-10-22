@@ -6,7 +6,7 @@ import torch
 from torch import nn
 
 
-class DepthwiseSeparableConvolution(nn.Module):
+class DepthwiseSeparableConv2d(nn.Module):
     """
     Depthwise Separable Convolution
 
