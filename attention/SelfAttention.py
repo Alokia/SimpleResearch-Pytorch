@@ -1,6 +1,8 @@
 """
 Vaswani A, Shazeer N, Parmar N, et al. Attention is all you need[J].
 Advances in neural information processing systems, 2017, 30.
+
+https://arxiv.org/abs/1706.03762
 """
 import torch
 from torch import nn

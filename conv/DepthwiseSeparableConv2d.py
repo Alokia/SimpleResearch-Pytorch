@@ -1,6 +1,8 @@
 """
 Chollet F. Xception: Deep learning with depthwise separable convolutions[C]//
 Proceedings of the IEEE conference on computer vision and pattern recognition. 2017: 1251-1258.
+
+https://arxiv.org/abs/1610.02357
 """
 import torch
 from torch import nn
