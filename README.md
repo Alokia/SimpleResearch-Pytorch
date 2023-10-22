@@ -42,3 +42,17 @@ dsconv = DepthwiseSeparableConv2d(3, 64, kernel_size=3, stride=2)
 out = dsconv(x)
 print(out.shape)  # [2, 64, 112, 112]
 ```
+
+* [Heterogeneous Convolution](https://arxiv.org/pdf/1903.04120.pdf)  
+Singh P, Verma V K, Rai P, et al. Hetconv: Heterogeneous kernel-based convolutions for deep cnns[C]//Proceedings of the IEEE/CVF conference on computer vision and pattern recognition. 2019: 4835-4844.
+
+```python
+from conv.HeterogeneousConv2d import HetConv2d
+import torch
+
+x = torch.rand(1, 16, 224, 125)
+conv = HetConv2d(16, 64, p=4)
+out = conv(x)
+print(out.shape)  # [1, 64, 224, 125]
+```
+
