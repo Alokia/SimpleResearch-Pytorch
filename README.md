@@ -6,7 +6,6 @@
 * [Self-Attention](https://arxiv.org/abs/1706.03762)  
 Vaswani A, Shazeer N, Parmar N, et al. Attention is all you need[J]. Advances in neural information processing systems, 2017, 30.
 
-
 ```python
 from attention.SelfAttention import ScaledDotProductAttention, MultiHeadAttention
 import torch
@@ -25,6 +24,22 @@ print(output_sdpa.shape)  # [50, 20, 512]
 print(output_mha.shape)  # [50, 20, 512]
 ```
 
+* Simplified Self-Attention
+
+```python
+from attention.SimplifiedSelfAttention import MultiHeadSimplifiedSelfAttention
+import torch
+
+query = torch.randn(50, 20, 512)
+key = torch.randn(50, 49, 512)
+value = torch.randn(50, 49, 512)
+
+mhssan = MultiHeadSimplifiedSelfAttention(d_model=512, n_heads=8)
+
+out = mhssan(query, key, value)
+
+print(out.shape)  # (50, 20, 512)
+```
 
 
 
