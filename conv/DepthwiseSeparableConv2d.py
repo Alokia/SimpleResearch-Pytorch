@@ -39,6 +39,6 @@ class DepthwiseSeparableConv2d(nn.Module):
 
 if __name__ == "__main__":
     x = torch.randn(2, 3, 224, 224)
-    dsconv = DepthwiseSeparableConvolution(3, 64, kernel_size=3, stride=2)
+    dsconv = DepthwiseSeparableConv2d(3, 64, kernel_size=3, stride=2)
     out = dsconv(x)
     print(out.shape)
