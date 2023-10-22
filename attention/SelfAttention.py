@@ -145,5 +145,5 @@ if __name__ == "__main__":
     output_sdpa = sdpa(query, key, value)
     output_mha = mha(query, key, value)
 
-    print(output_sdpa.shape)
-    print(output_mha.shape)
+    print(output_sdpa.shape)  # (50, 20, 512)
+    print(output_mha.shape)  # (50, 20, 512)
