@@ -50,29 +50,31 @@ class MultiHeadAttention(nn.Module):
     Multi-Head Attention
     """
 
-    def __init__(self, d_model: int, d_k: int, d_v: int, n_heads: int,
+    def __init__(self, d_model: int, n_heads: int, d_k: int = None, d_v: int = None,
                  dropout: float = 0.1, qkv_bias: bool = False, scale: float = None):
         """
         Parameters:
             d_model: 前面层的输出维度，即 queries、keys、values的维度 (batch_size, *, d_model)
-            d_k: queries 和 keys 的隐藏层维度
-            d_v: values 的隐藏层维度
             n_heads: heads 的数量
+            d_k: queries 和 keys 的隐藏层维度，如果为None，则默认为 d_model // n_heads
+            d_v: values 的隐藏层维度，如果为None，则默认为 d_model // n_heads
             dropout: dropout 的概率
             qkv_bias: 是否使用qkv全连接层的偏置
             scale: 缩放因子，如果为None，则默认为 np.sqrt(d_k)
         """
         super().__init__()
-        self.fc_q = nn.Linear(d_model, d_k * n_heads, bias=qkv_bias)
-        self.fc_k = nn.Linear(d_model, d_k * n_heads, bias=qkv_bias)
-        self.fc_v = nn.Linear(d_model, d_v * n_heads, bias=qkv_bias)
-        self.fc_out = nn.Linear(d_v * n_heads, d_model)
+
+        self.d_k = d_k if d_k is not None else d_model // n_heads
+        self.d_v = d_v if d_v is not None else d_model // n_heads
+
+        self.fc_q = nn.Linear(d_model, self.d_k * n_heads, bias=qkv_bias)
+        self.fc_k = nn.Linear(d_model, self.d_k * n_heads, bias=qkv_bias)
+        self.fc_v = nn.Linear(d_model, self.d_v * n_heads, bias=qkv_bias)
+        self.fc_out = nn.Linear(self.d_v * n_heads, d_model)
         self.dropout = nn.Dropout(dropout)
 
-        self.scale = np.sqrt(d_k) if scale is None else scale
+        self.scale = np.sqrt(self.d_k) if scale is None else scale
         self.d_model = d_model
-        self.d_k = d_k
-        self.d_v = d_v
         self.n_heads = n_heads
 
         self.init_weights()
@@ -138,7 +140,7 @@ if __name__ == "__main__":
     value = torch.randn(50, 49, 512)
 
     sdpa = ScaledDotProductAttention(dropout=0.2)
-    mha = MultiHeadAttention(d_model=512, d_k=512, d_v=256, n_heads=8)
+    mha = MultiHeadAttention(d_model=512, n_heads=8)
 
     output_sdpa = sdpa(query, key, value)
     output_mha = mha(query, key, value)
