@@ -3,7 +3,9 @@
 
 ## 注意力模块
 
-* [SelfAttention](https://arxiv.org/abs/1706.03762)
+* [Self-Attention](https://arxiv.org/abs/1706.03762)  
+Vaswani A, Shazeer N, Parmar N, et al. Attention is all you need[J]. Advances in neural information processing systems, 2017, 30.
+
 
 ```python
 from attention.SelfAttention import ScaledDotProductAttention, MultiHeadAttention
@@ -19,8 +21,8 @@ mha = MultiHeadAttention(d_model=512, d_k=512, d_v=256, n_heads=8)
 output_sdpa = sdpa(query, key, value)
 output_mha = mha(query, key, value)
 
-print(output_sdpa.shape)
-print(output_mha.shape)
+print(output_sdpa.shape)  # [50, 20, 512]
+print(output_mha.shape)  # [50, 20, 512]
 ```
 
 
@@ -28,3 +30,15 @@ print(output_mha.shape)
 
 ## 卷积模块
 
+* [Depthwise Separable Convolution](https://arxiv.org/abs/1610.02357)  
+Chollet F. Xception: Deep learning with depthwise separable convolutions[C]//Proceedings of the IEEE conference on computer vision and pattern recognition. 2017: 1251-1258.
+
+```python
+from conv.DepthwiseSeparableConv2d import DepthwiseSeparableConv2d
+import torch
+
+x = torch.randn(2, 3, 224, 224)
+dsconv = DepthwiseSeparableConv2d(3, 64, kernel_size=3, stride=2)
+out = dsconv(x)
+print(out.shape)  # [2, 64, 112, 112]
+```
