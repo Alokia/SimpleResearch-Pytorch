@@ -9,9 +9,6 @@ import numpy as np
 class MultiHeadSimplifiedSelfAttention(nn.Module):
     """
     Multi-Head Simplified Self-Attention
-
-    相比于传统的 Multi-Head Self-Attention，该模块的参数量更小，且效果基本没有降低。
-    该模块在语音识别问题中提出。
     """
 
     def __init__(self, d_model: int, n_heads: int, dropout: float = 0.1, scale: float = None):
