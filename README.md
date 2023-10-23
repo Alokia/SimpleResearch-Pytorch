@@ -3,8 +3,19 @@
 
 ## 注意力模块
 
-* [Self-Attention](https://arxiv.org/abs/1706.03762)  
+### 1. Self-Attention
+
+#### 引用
+
+https://arxiv.org/abs/1706.03762
+
 Vaswani A, Shazeer N, Parmar N, et al. Attention is all you need[J]. Advances in neural information processing systems, 2017, 30.
+
+#### 模型结构
+
+![](./figure/attention/SelfAttention.png)
+
+#### 使用方法
 
 ```python
 from attention.SelfAttention import ScaledDotProductAttention, MultiHeadAttention
@@ -24,7 +35,9 @@ print(output_sdpa.shape)  # [50, 20, 512]
 print(output_mha.shape)  # [50, 20, 512]
 ```
 
-* Simplified Self-Attention
+### 2. Simplified Self-Attention
+
+#### 使用方法
 
 ```python
 from attention.SimplifiedSelfAttention import MultiHeadSimplifiedSelfAttention
@@ -41,8 +54,19 @@ out = mhssan(query, key, value)
 print(out.shape)  # (50, 20, 512)
 ```
 
-* [External Attention](https://arxiv.org/abs/2105.02358)  
+### 3. External Attention
+
+#### 引用
+
+https://arxiv.org/abs/2105.02358
+
 Guo M H, Liu Z N, Mu T J, et al. Beyond self-attention: External attention using two linear layers for visual tasks[J]. IEEE Transactions on Pattern Analysis and Machine Intelligence, 2022, 45(5): 5436-5447.
+
+#### 模型结构
+
+![](./figure/attention/ExternalAttention.png)
+
+#### 使用方法
 
 ```python
 from attention.ExternalAttention import ExternalAttention, MultiHeadExternalAttention
@@ -59,10 +83,21 @@ print(output_ea.shape)  # (3, 49, 512)
 print(output_mhea.shape)  # (3, 49, 512)
 ```
 
+
+
+
+
 ## 卷积模块
 
-* [Depthwise Separable Convolution](https://arxiv.org/abs/1610.02357)  
+### 1. Depthwise Separable Convolution
+
+#### 引用
+
+https://arxiv.org/abs/1610.02357
+
 Chollet F. Xception: Deep learning with depthwise separable convolutions[C]//Proceedings of the IEEE conference on computer vision and pattern recognition. 2017: 1251-1258.
+
+#### 使用方法
 
 ```python
 from conv.DepthwiseSeparableConv2d import DepthwiseSeparableConv2d
@@ -74,8 +109,15 @@ out = dsconv(x)
 print(out.shape)  # [2, 64, 112, 112]
 ```
 
-* [Heterogeneous Convolution](https://arxiv.org/pdf/1903.04120.pdf)  
+### 2. Heterogeneous Convolution
+
+#### 引用
+
+https://arxiv.org/pdf/1903.04120.pdf
+
 Singh P, Verma V K, Rai P, et al. Hetconv: Heterogeneous kernel-based convolutions for deep cnns[C]//Proceedings of the IEEE/CVF conference on computer vision and pattern recognition. 2019: 4835-4844.
+
+#### 使用方法
 
 ```python
 from conv.HeterogeneousConv2d import HetConv2d
