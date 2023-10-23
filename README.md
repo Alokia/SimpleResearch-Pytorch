@@ -83,6 +83,32 @@ print(output_ea.shape)  # (3, 49, 512)
 print(output_mhea.shape)  # (3, 49, 512)
 ```
 
+### 4. Squeeze-and-Excitation Attention (SEAttention)
+
+#### 引用
+
+https://arxiv.org/abs/1709.01507
+
+Hu J, Shen L, Sun G. Squeeze-and-excitation networks[C]//Proceedings of the IEEE conference on computer vision and pattern recognition. 2018: 7132-7141.
+
+#### 模型结构
+
+![](./figure/attention/SEAttention.png)
+
+#### 使用方法
+
+```python
+from attention.SEAttention import SEAttention
+import torch
+
+x = torch.randn(16, 256, 7, 7)
+se = SEAttention(in_channels=256, reduction=8)
+output = se(x)
+print(output.shape) # [16, 256, 7, 7]
+```
+
+
+
 
 
 
