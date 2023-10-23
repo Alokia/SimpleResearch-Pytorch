@@ -41,7 +41,23 @@ out = mhssan(query, key, value)
 print(out.shape)  # (50, 20, 512)
 ```
 
+* [External Attention](https://arxiv.org/abs/2105.02358)  
+Guo M H, Liu Z N, Mu T J, et al. Beyond self-attention: External attention using two linear layers for visual tasks[J]. IEEE Transactions on Pattern Analysis and Machine Intelligence, 2022, 45(5): 5436-5447.
 
+```python
+from attention.ExternalAttention import ExternalAttention, MultiHeadExternalAttention
+import torch
+
+x = torch.randn(3, 49, 512)
+ea = ExternalAttention(d_model=512, S=64)
+mhea = MultiHeadExternalAttention(d_model=512, n_heads=4, coef=4, S=64)
+
+output_ea = ea(x)
+output_mhea = mhea(x)
+
+print(output_ea.shape)  # (3, 49, 512)
+print(output_mhea.shape)  # (3, 49, 512)
+```
 
 ## 卷积模块
 

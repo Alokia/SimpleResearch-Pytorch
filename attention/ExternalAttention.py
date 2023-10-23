@@ -137,5 +137,5 @@ if __name__ == '__main__':
     output_ea = ea(x)
     output_mhea = mhea(x)
 
-    print(output_ea.shape)
-    print(output_mhea.shape)
+    print(output_ea.shape)  # (3, 49, 512)
+    print(output_mhea.shape)  # (3, 49, 512)
