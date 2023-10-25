@@ -129,7 +129,23 @@ output = se(x)
 print(output.shape)  # (50, 512, 7, 7)
 ```
 
+### 6. Sim Attention (SimAM)
+#### 引用
+https://proceedings.mlr.press/v139/yang21o/yang21o.pdf
 
+Yang L, Zhang R Y, Li L, et al. Simam: A simple, parameter-free attention module for convolutional neural networks[C]//International conference on machine learning. PMLR, 2021: 11863-11874.
+
+#### 使用方法
+
+```python
+from attention.SimAM import SimAM
+import torch
+
+x = torch.randn(3, 64, 7, 7)
+model = SimAM()
+outputs = model(x)
+print(outputs.shape)  # (3, 64, 7, 7)
+```
 
 
 ## 卷积模块
