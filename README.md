@@ -107,8 +107,27 @@ output = se(x)
 print(output.shape) # [16, 256, 7, 7]
 ```
 
+### 5. Selective Kernel Attention (SKAttention)
+#### 引用
+https://arxiv.org/abs/1903.06586
 
+Li X, Wang W, Hu X, et al. Selective kernel networks[C]//Proceedings of the IEEE/CVF conference on computer vision and pattern recognition. 2019: 510-519.
 
+#### 模型结构
+
+![](./figure/attention/SKAttention.png)
+
+#### 使用方法
+
+```python
+from attention.SKAttention import SKAttention
+import torch
+
+x = torch.randn(50, 512, 7, 7)
+se = SKAttention(in_channels=512)
+output = se(x)
+print(output.shape)  # (50, 512, 7, 7)
+```
 
 
 
