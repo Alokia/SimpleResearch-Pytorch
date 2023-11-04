@@ -36,15 +36,6 @@ class ExternalAttention(nn.Module):
         self.softmax = nn.Softmax(dim=1)
         self.dropout = nn.Dropout(dropout)
 
-        self.init_weights()
-
-    def init_weights(self):
-        for m in self.modules():
-            if isinstance(m, nn.Linear):
-                nn.init.normal_(m.weight, std=0.001)
-                if m.bias is not None:
-                    nn.init.constant_(m.bias, 0)
-
     def forward(self, queries: torch.Tensor):
         """
         Parameters:
@@ -93,15 +84,6 @@ class MultiHeadExternalAttention(nn.Module):
 
         self.fc_o = nn.Linear(d_model * self.coef, d_model, bias=False)
         self.softmax = nn.Softmax(dim=1)
-
-        self.init_weights()
-
-    def init_weights(self):
-        for m in self.modules():
-            if isinstance(m, nn.Linear):
-                nn.init.normal_(m.weight, std=0.001)
-                if m.bias is not None:
-                    nn.init.constant_(m.bias, 0)
 
     def forward(self, queries: torch.Tensor):
         """

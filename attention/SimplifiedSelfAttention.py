@@ -31,15 +31,6 @@ class MultiHeadSimplifiedSelfAttention(nn.Module):
         self.fc_out = nn.Linear(n_heads * self.d_v, d_model)
         self.dropout = nn.Dropout(dropout)
 
-        self.init_weights()
-
-    def init_weights(self):
-        for m in self.modules():
-            if isinstance(m, nn.Linear):
-                nn.init.normal_(m.weight, std=0.001)
-                if m.bias is not None:
-                    nn.init.constant_(m.bias, 0)
-
     def forward(self, queries: torch.Tensor, keys: torch.Tensor, values: torch.Tensor,
                 attn_mask: torch.Tensor = None, attn_weights: torch.Tensor = None) -> torch.Tensor:
         """

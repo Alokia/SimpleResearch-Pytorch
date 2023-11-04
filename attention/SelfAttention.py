@@ -77,15 +77,6 @@ class MultiHeadAttention(nn.Module):
         self.d_model = d_model
         self.n_heads = n_heads
 
-        self.init_weights()
-
-    def init_weights(self):
-        for m in self.modules():
-            if isinstance(m, nn.Linear):
-                nn.init.normal_(m.weight, std=0.001)
-                if m.bias is not None:
-                    nn.init.constant_(m.bias, 0)
-
     def forward(self, queries: torch.Tensor, keys: torch.Tensor, values: torch.Tensor,
                 attn_mask: torch.Tensor = None, attn_weights: torch.Tensor = None) -> torch.Tensor:
         """
