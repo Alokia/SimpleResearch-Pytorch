@@ -50,16 +50,18 @@ class SpatialAttentionModule(nn.Module):
 
 
 class CBAM(nn.Module):
-    def __init__(self, channel, reduction=16, kernel_size=7):
+    def __init__(self, in_channels, reduction=16, kernel_size=7, channel_first=True):
         """
         Parameters:
-            channel: number of input channels
+            in_channels: number of input channels
             reduction: reduction ratio
             kernel_size: kernel size of the convolution operation
+            channel_first: if True, Channel Attention Module is applied first, otherwise Spatial Attention Module is applied first
         """
         super().__init__()
-        self.ca = ChannelAttentionModule(channel, reduction)
+        self.ca = ChannelAttentionModule(in_channels, reduction)
         self.sa = SpatialAttentionModule(kernel_size)
+        self.channel_first = channel_first
 
     def forward(self, x):
         """
@@ -71,15 +73,18 @@ class CBAM(nn.Module):
         """
         batch_size, channels, _, _ = x.shape
         residual = x  # (batch_size, channels, height, width)
-        out = x * self.ca(x)  # (batch_size, channels, height, width)
-        out = out * self.sa(out)  # (batch_size, channels, height, width)
+        if self.channel_first:
+            out = x * self.ca(x)  # (batch_size, channels, height, width)
+            out = out * self.sa(out)  # (batch_size, channels, height, width)
+        else:
+            out = x * self.sa(x)  # (batch_size, channels, height, width)
+            out = out * self.ca(out)  # (batch_size, channels, height, width)
         out = out + residual  # (batch_size, channels, height, width)
         return out
 
 
 if __name__ == '__main__':
-    model = CBAM(channel=512)
+    model = CBAM(in_channels=512, channel_first=True)
     x = torch.randn(2, 512, 14, 14)
     out = model(x)
     print(out.shape)  # (2, 512, 14, 14)
-
