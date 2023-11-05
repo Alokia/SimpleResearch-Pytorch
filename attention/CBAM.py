@@ -31,7 +31,7 @@ class ChannelAttentionModule(nn.Module):
         max_out = self.mlp(max_result)  # (batch_size, channels, 1, 1)
         avg_out = self.mlp(avg_result)  # (batch_size, channels, 1, 1)
         out = self.sigmoid(max_out + avg_out)  # (batch_size, channels, 1, 1)
-        return out
+        return x * out
 
 
 class SpatialAttentionModule(nn.Module):
@@ -46,22 +46,24 @@ class SpatialAttentionModule(nn.Module):
         result = torch.cat([max_result, avg_result], dim=1)  # (batch_size, 2, height, width)
         out = self.conv(result)  # (batch_size, 1, height, width)
         out = self.sigmoid(out)  # (batch_size, 1, height, width)
-        return out
+        return x * out
 
 
 class CBAM(nn.Module):
-    def __init__(self, in_channels, reduction=16, kernel_size=7, channel_first=True):
+    def __init__(self, in_channels, reduction=16, kernel_size=7, channel_first=True, no_spatial=False):
         """
         Parameters:
             in_channels: number of input channels
             reduction: reduction ratio
             kernel_size: kernel size of the convolution operation
             channel_first: if True, Channel Attention Module is applied first, otherwise Spatial Attention Module is applied first
+            no_spatial: if True, Spatial Attention Module is not applied
         """
         super().__init__()
         self.ca = ChannelAttentionModule(in_channels, reduction)
         self.sa = SpatialAttentionModule(kernel_size)
         self.channel_first = channel_first
+        self.no_spatial = no_spatial
 
     def forward(self, x):
         """
@@ -73,18 +75,21 @@ class CBAM(nn.Module):
         """
         batch_size, channels, _, _ = x.shape
         residual = x  # (batch_size, channels, height, width)
-        if self.channel_first:
-            out = x * self.ca(x)  # (batch_size, channels, height, width)
-            out = out * self.sa(out)  # (batch_size, channels, height, width)
+        if self.no_spatial:
+            out = self.ca(x)
         else:
-            out = x * self.sa(x)  # (batch_size, channels, height, width)
-            out = out * self.ca(out)  # (batch_size, channels, height, width)
+            if self.channel_first:
+                out = self.ca(x)  # (batch_size, channels, height, width)
+                out = self.sa(out)  # (batch_size, channels, height, width)
+            else:
+                out = self.sa(x)  # (batch_size, channels, height, width)
+                out = self.ca(out)  # (batch_size, channels, height, width)
         out = out + residual  # (batch_size, channels, height, width)
         return out
 
 
 if __name__ == '__main__':
-    model = CBAM(in_channels=512, channel_first=True)
+    model = CBAM(in_channels=512, channel_first=True, no_spatial=False)
     x = torch.randn(2, 512, 14, 14)
     out = model(x)
     print(out.shape)  # (2, 512, 14, 14)
