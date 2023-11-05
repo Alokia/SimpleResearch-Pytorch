@@ -67,6 +67,13 @@ class BAM(nn.Module):
         self.spatial_attn = SpatialGate(in_channels, reduction, num_dilation_conv, dilation)
 
     def forward(self, x):
+        """
+        Parameters:
+            x: feature map with shape of (batch_size, channels, height, width)
+
+        Returns:
+            a tensor with shape of (batch_size, channels, height, width)
+        """
         attn = 1 + torch.sigmoid(self.channel_attn(x) * self.spatial_attn(x))  # (batch_size, channel, height, width)
         return attn * x  # (batch_size, channel, height, width)
 
