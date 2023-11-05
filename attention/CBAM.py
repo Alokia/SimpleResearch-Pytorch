@@ -8,7 +8,7 @@ import torch
 from torch import nn
 
 
-class ChannelAttentionModule(nn.Module):
+class ChannelGate(nn.Module):
     def __init__(self, in_channels, reduction=16):
         """
         Parameters:
@@ -34,7 +34,7 @@ class ChannelAttentionModule(nn.Module):
         return x * out
 
 
-class SpatialAttentionModule(nn.Module):
+class SpatialGate(nn.Module):
     def __init__(self, kernel_size=7):
         super().__init__()
         self.conv = nn.Conv2d(in_channels=2, out_channels=1, kernel_size=kernel_size, padding=kernel_size // 2)
@@ -60,8 +60,8 @@ class CBAM(nn.Module):
             no_spatial: if True, Spatial Attention Module is not applied
         """
         super().__init__()
-        self.ca = ChannelAttentionModule(in_channels, reduction)
-        self.sa = SpatialAttentionModule(kernel_size)
+        self.channel_attn = ChannelGate(in_channels, reduction)
+        self.spatial_attn = SpatialGate(kernel_size)
         self.channel_first = channel_first
         self.no_spatial = no_spatial
 
@@ -76,14 +76,14 @@ class CBAM(nn.Module):
         batch_size, channels, _, _ = x.shape
         residual = x  # (batch_size, channels, height, width)
         if self.no_spatial:
-            out = self.ca(x)
+            out = self.channel_attn(x)
         else:
             if self.channel_first:
-                out = self.ca(x)  # (batch_size, channels, height, width)
-                out = self.sa(out)  # (batch_size, channels, height, width)
+                out = self.channel_attn(x)  # (batch_size, channels, height, width)
+                out = self.spatial_attn(out)  # (batch_size, channels, height, width)
             else:
-                out = self.sa(x)  # (batch_size, channels, height, width)
-                out = self.ca(out)  # (batch_size, channels, height, width)
+                out = self.spatial_attn(x)  # (batch_size, channels, height, width)
+                out = self.channel_attn(out)  # (batch_size, channels, height, width)
         out = out + residual  # (batch_size, channels, height, width)
         return out
 
