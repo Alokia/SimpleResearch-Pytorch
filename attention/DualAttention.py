@@ -6,8 +6,8 @@ https://arxiv.org/pdf/1809.02983.pdf
 """
 import torch
 from torch import nn
-from SelfAttention import MultiHeadAttention
-from SimplifiedSelfAttention import MultiHeadSimplifiedSelfAttention
+from attention.SelfAttention import MultiHeadAttention
+from attention.SimplifiedSelfAttention import MultiHeadSimplifiedSelfAttention
 
 
 class PositionAttentionModule(nn.Module):
