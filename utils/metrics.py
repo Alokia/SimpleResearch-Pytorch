@@ -4,7 +4,7 @@ import torch
 
 
 @torch.no_grad()
-def accuracy(y_pred: Tensor, y_true: Tensor, topk: Tuple[int] = (1,)):
+def accuracy(y_pred: Tensor, y_true: Tensor, topk: Tuple[int, ...] = (1,)):
     """
     Parameters:
         y_pred: Tensor of shape (batch_size, num_classes)
