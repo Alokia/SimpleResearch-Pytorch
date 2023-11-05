@@ -37,7 +37,11 @@ class ChannelGate(nn.Module):
 class SpatialGate(nn.Module):
     def __init__(self, kernel_size=7):
         super().__init__()
-        self.conv = nn.Conv2d(in_channels=2, out_channels=1, kernel_size=kernel_size, padding=kernel_size // 2)
+        self.conv = nn.Sequential(
+            nn.Conv2d(in_channels=2, out_channels=1, kernel_size=kernel_size,
+                      padding=kernel_size // 2, bias=False),
+            nn.BatchNorm2d(1, eps=1e-5, momentum=0.01)
+        )
         self.sigmoid = nn.Sigmoid()
 
     def forward(self, x):
@@ -62,7 +66,8 @@ class CBAM(nn.Module):
         """
         super().__init__()
         self.channel_attn = ChannelGate(in_channels, reduction)
-        self.spatial_attn = SpatialGate(kernel_size)
+        if not no_spatial:
+            self.spatial_attn = SpatialGate(kernel_size)
         self.channel_first = channel_first
         self.no_spatial = no_spatial
 
