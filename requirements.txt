@@ -1,0 +1,3 @@
+torch~=2.0.1+cu117
+pathlib2~=2.3.7.post1
+numpy~=1.23.5
