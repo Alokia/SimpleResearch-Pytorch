@@ -160,28 +160,43 @@ class ResNet(nn.Module):
         return x
 
 
-def resnet18(num_classes, norm_layer=None):
+def resnet18(num_classes: int, norm_layer=None):
     return ResNet(BasicBlock, [2, 2, 2, 2], num_classes=num_classes, norm_layer=norm_layer)
 
 
-def resnet34(num_classes, norm_layer=None):
+def resnet34(num_classes: int, norm_layer=None):
     return ResNet(BasicBlock, [3, 4, 6, 3], num_classes=num_classes, norm_layer=norm_layer)
 
 
-def resnet50(num_classes, norm_layer=None):
+def resnet50(num_classes: int, norm_layer=None):
     return ResNet(Bottleneck, [3, 4, 6, 3], num_classes=num_classes, norm_layer=norm_layer)
 
 
-def resnet101(num_classes, norm_layer=None):
+def resnet101(num_classes: int, norm_layer=None):
     return ResNet(Bottleneck, [3, 4, 23, 3], num_classes=num_classes, norm_layer=norm_layer)
 
 
-def resnet152(num_classes, norm_layer=None):
+def resnet152(num_classes: int, norm_layer=None):
     return ResNet(Bottleneck, [3, 8, 36, 3], num_classes=num_classes, norm_layer=norm_layer)
+
+
+def resnet(num_classes: int, norm_layer=None, mode=50):
+    if mode == 18:
+        return resnet18(num_classes, norm_layer)
+    elif mode == 34:
+        return resnet34(num_classes, norm_layer)
+    elif mode == 50:
+        return resnet50(num_classes, norm_layer)
+    elif mode == 101:
+        return resnet101(num_classes, norm_layer)
+    elif mode == 152:
+        return resnet152(num_classes, norm_layer)
+    else:
+        raise ValueError(f"mode should be one of [18, 34, 50, 101, 152], but got {mode}")
 
 
 if __name__ == '__main__':
     x = torch.randn(3, 3, 224, 224)
-    model = resnet50(100)
+    model = resnet(100, mode=18)
     out = model(x)
     print(out.shape)
