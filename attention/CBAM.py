@@ -9,7 +9,7 @@ from torch import nn
 
 
 class ChannelGate(nn.Module):
-    def __init__(self, in_channels, reduction=16):
+    def __init__(self, in_channels: int, reduction: int = 16):
         """
         Parameters:
             in_channels: number of input channels
@@ -50,7 +50,8 @@ class SpatialGate(nn.Module):
 
 
 class CBAM(nn.Module):
-    def __init__(self, in_channels, reduction=16, kernel_size=7, channel_first=True, no_spatial=False):
+    def __init__(self, in_channels: int, reduction: int = 16, kernel_size=7,
+                 channel_first: bool = True, no_spatial: bool = False):
         """
         Parameters:
             in_channels: number of input channels
