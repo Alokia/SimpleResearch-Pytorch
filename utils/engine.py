@@ -53,7 +53,7 @@ def classification_train_one_epoch(loader: Iterable, model, criterion: Callable,
         save_training_log(log_freq, step, batch_size, prefix=f'Train Epoch: {epoch} - ',
                           loss=loss_meter.avg)
 
-    return loss_meter.avg
+    return loss_meter.avg, [meter.avg for meter in acc_meter]
 
 
 @torch.no_grad()
@@ -96,4 +96,4 @@ def classification_evaluate(loader: Iterable, model, criterion: Callable, device
         save_training_log(log_freq, step, batch_size, prefix="Evaluate: ",
                           loss=loss_meter.avg)
 
-    return loss_meter.avg
+    return loss_meter.avg, [meter.avg for meter in acc_meter]
