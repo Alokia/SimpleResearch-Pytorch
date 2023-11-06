@@ -10,8 +10,8 @@ from typing import Tuple
 
 
 class PSA(nn.Module):
-    def __init__(self, in_channels: int, out_channels: int, kernel_sizes: Tuple[int] = (3, 5, 7, 9),
-                 stride: int = 1, groups: Tuple[int] = (1, 4, 8, 16), reduction: int = 16):
+    def __init__(self, in_channels: int, out_channels: int, kernel_sizes: Tuple[int, ...] = (3, 5, 7, 9),
+                 stride: int = 1, groups: Tuple[int, ...] = (1, 4, 8, 16), reduction: int = 16):
         """
         Parameters:
             in_channels: number of input channels
