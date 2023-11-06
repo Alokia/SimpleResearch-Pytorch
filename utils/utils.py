@@ -1,3 +1,8 @@
+import random
+import torch
+import torch.backends.cudnn as cudnn
+
+
 class AverageMeter(object):
     """Computes and stores the average and current value"""
 
@@ -18,3 +23,11 @@ class AverageMeter(object):
         self.sum += val * n
         self.count += n
         self.avg = self.sum / self.count
+
+
+def seed_everything(seed: int = None):
+    # 固定随机种子，保证结果可复现
+    if seed is not None:
+        random.seed(seed)
+        torch.manual_seed(seed)
+        cudnn.deterministic = True
