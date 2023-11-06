@@ -80,9 +80,9 @@ class Bottleneck(nn.Module):
 
         self.method = method
         if method == 'BAM':
-            self.ext = BAM(planes, reduction=16)
+            self.ext = BAM(planes * self.expansion, reduction=16)
         elif method == 'CBAM':
-            self.ext = CBAM(planes, reduction=16)
+            self.ext = CBAM(planes * self.expansion, reduction=16)
 
     def forward(self, x: Tensor) -> Tensor:
         identity = x
@@ -239,6 +239,6 @@ def resnet_with_bam_and_cbam(num_classes: int, norm_layer=None, mode=50, method=
 
 if __name__ == '__main__':
     x = torch.randn(3, 3, 224, 224)
-    model = resnet_with_bam_and_cbam(100, mode=18, method='CBAM')
+    model = resnet_with_bam_and_cbam(2, mode=50, method='BAM')
     out = model(x)
     print(out.shape)
