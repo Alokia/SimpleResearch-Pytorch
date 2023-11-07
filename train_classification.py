@@ -41,7 +41,6 @@ def main(args):
             transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
         ]))
 
-    train_sampler, val_sampler, train_batch_sampler = None, None, None
     if args.distributed:
         # 给每个rank对应的进程分配训练的样本索引
         train_sampler = torch.utils.data.distributed.DistributedSampler(train_dataset)
@@ -49,11 +48,16 @@ def main(args):
         # 将样本索引每batch_size个元素组成一个list
         train_batch_sampler = torch.utils.data.BatchSampler(train_sampler, args.batch_size, drop_last=True)
 
-    train_loader = torch.utils.data.DataLoader(train_dataset, batch_sampler=train_batch_sampler,
-                                               num_workers=args.num_workers, pin_memory=True,
-                                               batch_size=args.batch_size)
-    val_loader = torch.utils.data.DataLoader(val_dataset, batch_size=args.batch_size, pin_memory=True,
-                                             sampler=val_sampler, num_workers=args.num_workers, )
+        train_loader = torch.utils.data.DataLoader(train_dataset, batch_sampler=train_batch_sampler,
+                                                   num_workers=args.num_workers, pin_memory=True, )
+        val_loader = torch.utils.data.DataLoader(val_dataset, batch_size=args.batch_size, pin_memory=True,
+                                                 sampler=val_sampler, num_workers=args.num_workers, )
+    else:
+        train_sampler = None
+        train_loader = torch.utils.data.DataLoader(train_dataset, batch_size=args.batch_size, shuffle=True,
+                                                   num_workers=args.num_workers, pin_memory=True, )
+        val_loader = torch.utils.data.DataLoader(val_dataset, batch_size=args.batch_size, pin_memory=True,
+                                                 num_workers=args.num_workers, )
 
     # 模型
     model = resnet_with_bam_and_cbam(num_classes=args.num_classes, mode=args.model_mode, method='BAM').to(device)
@@ -75,7 +79,8 @@ def main(args):
     criterion = nn.CrossEntropyLoss()
     optimizer = Adam(model.parameters(), lr=args.lr)
 
-    classification_step(train_loader, model, criterion, optimizer, device, val_loader=val_loader, args=args)
+    classification_step(train_loader, model, criterion, optimizer, device, val_loader=val_loader,
+                        args=args, sampler=train_sampler)
 
     # 删除临时缓存文件
     if args.rank == 0:

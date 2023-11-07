@@ -77,7 +77,7 @@ def resume_checkpoint(args, model, device, optimizer, model_cp, early_stop):
     return start_epoch
 
 
-def classification_step(train_loader, model, criterion, optimizer, device, val_loader=None, args=None):
+def classification_step(train_loader, model, criterion, optimizer, device, val_loader=None, args=None, sampler=None):
     # 是否固定随机种子
     seed_everything(args.seed)
     # 自动保存训练过程
@@ -91,9 +91,9 @@ def classification_step(train_loader, model, criterion, optimizer, device, val_l
 
     # 开始训练
     for epoch in range(start_epoch, args.epochs + 1):
-        if args.distributed:
+        if args.distributed and sampler is not None:
             # 在每个epoch开始前打乱数据顺序
-            train_loader.sampler.set_epoch(epoch)
+            sampler.set_epoch(epoch)
 
         metrics = {}
         # 训练一个epoch
