@@ -9,13 +9,12 @@ def argument_parser(return_parser=True):
     parser = ArgumentParser()
 
     # 分布式训练相关参数
-    parser.add_argument('--single_gpu', type=int, default=None, help='use a single gpu to train')
+    parser.add_argument('--device', type=str, default='cuda', help='use which device to train')
     parser.add_argument('--distributed', action='store_true', default=False, help='whether to use distributed training')
     # 开启的进程数(注意不是线程), 在单机中指使用GPU的数量
     parser.add_argument('--world_size', type=int, default=1, help='number of distributed processes')
     parser.add_argument('--dist_backend', default='gloo', type=str, help='distributed backend, win: gloo, linux: nccl')
     parser.add_argument('--local_rank', type=int, default=0, help='node rank for distributed training')
-    parser.add_argument('--multi_gpu', type=str, default="0", help='use multiple cuda to train')
 
     # 训练相关参数
     parser.add_argument('--epochs', type=int, default=20, help='number of epochs')
@@ -26,14 +25,14 @@ def argument_parser(return_parser=True):
 
     # 恢复训练相关参数
     parser.add_argument('--resume', action="store_true", default=False, help='resume from checkpoint')
-    parser.add_argument('--resume_checkpoint', type=str, required=True, help='resume from checkpoint path')
+    parser.add_argument('--resume_checkpoint', type=str, default='checkpoints.pth', help='resume from checkpoint path')
     parser.add_argument('--resume_model_only', action='store_true', default=False, help='resume model only')
     parser.add_argument('--resume_callback_reset', action='store_true', default=False,
                         help='whether to reset callback state')
 
     # 回调函数相关参数
     parser.add_argument('--use_cp', action='store_true', default=False, help='whether to use ModelCheckpoint')
-    parser.add_argument('--save_path', type=str, default='checkpoints', help='ModelCheckpoint save path')
+    parser.add_argument('--save_path', type=str, default='checkpoints.pth', help='ModelCheckpoint save path')
     parser.add_argument('--cp_monitor', type=str, default='train_top1_acc', help='ModelCheckpoint monitor')
     parser.add_argument('--cp_mode', type=str, default='max', choices=['min', 'max'], help='ModelCheckpoint mode')
     parser.add_argument('--not_save_best_only', action='store_false', default=True,
