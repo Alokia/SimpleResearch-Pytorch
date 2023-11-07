@@ -8,7 +8,7 @@ from utils.logging import save_training_log
 
 def classification_train_one_epoch(loader: Iterable, model, criterion: Callable, optimizer,
                                    device, epoch: int = 0, log_freq: int = 0, tqdm_desc: bool = True,
-                                   topk: Tuple[int, ...] = (1,)):
+                                   topk: Tuple[int, ...] = (1,), use_tqdm: bool = True):
     """
     Parameters:
         loader: 训练集的dataloader
@@ -20,12 +20,14 @@ def classification_train_one_epoch(loader: Iterable, model, criterion: Callable,
         log_freq: 日志记录的频率，如果为None，则不记录日志，如果为0，则记录当前epoch的日志
         tqdm_desc: 是否显示tqdm的描述信息
         topk: 计算topk准确率指标, 默认为(1,), 不得超过类别数
+        use_tqdm: 是否使用tqdm
     """
     model.train()
     loss_meter = AverageMeter()
     acc_meter = [AverageMeter() for _ in topk]
 
-    loader = tqdm(loader, colour="#f09199", dynamic_ncols=True)
+    if use_tqdm:
+        loader = tqdm(loader, colour="#f09199", dynamic_ncols=True)
     for step, (images, labels) in enumerate(loader):
         images = images.to(device, non_blocking=True)
         labels = labels.to(device, non_blocking=True)
@@ -44,11 +46,12 @@ def classification_train_one_epoch(loader: Iterable, model, criterion: Callable,
         loss.backward()
         optimizer.step()
 
-        if tqdm_desc:
-            desc = f"Epoch: {epoch} --> loss: {loss_meter.avg:.4f}"
-            for i, meter in enumerate(acc_meter):
-                desc += f" | top{topk[i]}_acc: {meter.avg:.4f}%"
-            loader.desc = desc
+        if use_tqdm:
+            if tqdm_desc:
+                desc = f"Epoch: {epoch} --> loss: {loss_meter.avg:.4f}"
+                for i, meter in enumerate(acc_meter):
+                    desc += f" | top{topk[i]}_acc: {meter.avg:.4f}%"
+                loader.desc = desc
         # 记录日志
         save_training_log(log_freq, step, batch_size, prefix=f'Train Epoch: {epoch} - ',
                           loss=loss_meter.avg)
@@ -58,7 +61,8 @@ def classification_train_one_epoch(loader: Iterable, model, criterion: Callable,
 
 @torch.no_grad()
 def classification_evaluate(loader: Iterable, model, criterion: Callable, device,
-                            log_freq: int = 0, tqdm_desc: bool = True, topk: Tuple[int, ...] = (1,)):
+                            log_freq: int = 0, tqdm_desc: bool = True, topk: Tuple[int, ...] = (1,),
+                            use_tqdm: bool = True):
     """
     Parameters:
         loader: 验证集的dataloader
@@ -68,11 +72,13 @@ def classification_evaluate(loader: Iterable, model, criterion: Callable, device
         log_freq: 日志记录的频率，如果为None，则不记录日志，如果为0，则记录当前epoch的日志
         tqdm_desc: 是否显示tqdm的描述信息
         topk: 计算topk准确率指标, 默认为(1,), 不得超过类别数
+        use_tqdm: 是否使用tqdm
     """
     loss_meter = AverageMeter()
     acc_meter = [AverageMeter() for _ in topk]
 
-    loader = tqdm(loader, colour="#a0d8ef", dynamic_ncols=True)
+    if use_tqdm:
+        loader = tqdm(loader, colour="#a0d8ef", dynamic_ncols=True)
     for step, (images, labels) in enumerate(loader):
         images = images.to(device, non_blocking=True)
         labels = labels.to(device, non_blocking=True)
@@ -87,11 +93,12 @@ def classification_evaluate(loader: Iterable, model, criterion: Callable, device
         for i, meter in enumerate(acc_meter):
             meter.update(acc[i].item(), batch_size)
 
-        if tqdm_desc:
-            desc = f"      --> loss: {loss_meter.avg:.4f}"
-            for i, meter in enumerate(acc_meter):
-                desc += f" | top{topk[i]}_acc: {meter.avg:.4f}%"
-            loader.desc = desc
+        if use_tqdm:
+            if tqdm_desc:
+                desc = f"      --> loss: {loss_meter.avg:.4f}"
+                for i, meter in enumerate(acc_meter):
+                    desc += f" | top{topk[i]}_acc: {meter.avg:.4f}%"
+                loader.desc = desc
         # 记录日志
         save_training_log(log_freq, step, batch_size, prefix="Evaluate: ",
                           loss=loss_meter.avg)
