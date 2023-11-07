@@ -54,8 +54,7 @@ def argument_parser(return_parser=True):
     return parser.parse_args()
 
 
-def classification_step(train_loader, model, criterion, optimizer, device, val_loader=None,
-                        args=None, train_sampler=None):
+def classification_step(train_loader, model, criterion, optimizer, device, val_loader=None, args=None):
     # 是否固定随机种子
     seed_everything(args.seed)
     # 自动保存训练过程
@@ -83,7 +82,8 @@ def classification_step(train_loader, model, criterion, optimizer, device, val_l
 
     for epoch in range(start_epoch, args.epochs + 1):
         if args.distributed:
-            train_sampler.set_epoch(epoch)
+            # 在每个epoch开始前打乱数据顺序
+            train_loader.sampler.set_epoch(epoch)
 
         metrics = {}
         # 训练一个epoch
@@ -117,4 +117,7 @@ def classification_step(train_loader, model, criterion, optimizer, device, val_l
         # 提前终止
         if args.use_early_stop:
             if early_stop.step(metrics):
-                return
+                break
+
+    # 清理进程
+    torch.distributed.destroy_process_group()
