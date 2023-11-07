@@ -22,6 +22,7 @@ def argument_parser(return_parser=True):
     parser.add_argument('--val_every_epoch', type=int, default=1, help='validate every n epoch')
     parser.add_argument('--seed', type=int, default=None, help='random seed')
     parser.add_argument('--lr', type=float, default=0.001, help='learning rate')
+    parser.add_argument('--tqdm', action='store_true', default=False, help='whether to use tqdm')
 
     # 恢复训练相关参数
     parser.add_argument('--resume', action="store_true", default=False, help='resume from checkpoint')
