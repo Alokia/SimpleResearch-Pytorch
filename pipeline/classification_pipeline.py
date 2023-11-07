@@ -121,15 +121,16 @@ def classification_step(train_loader, model, criterion, optimizer, device, val_l
 
         # 保存模型
         if args.use_cp:
-            save_dict = {'model': model.state_dict()}
+            if args.distributed and args.gpu == 0:
+                save_dict = {'model': model.module.state_dict()}
+            else:
+                save_dict = {'model': model.state_dict()}
             if not args.save_model_only:
                 save_dict.update({'optimizer': optimizer.state_dict(), 'start_epoch': epoch, 'args': args,
                                   'model_cp': model_cp.state_dict(), 'early_stop': early_stop.state_dict()})
-            model_cp.step(metrics, **save_dict)
+            if not args.distributed or (args.distributed and args.gpu == 0):
+                model_cp.step(metrics, **save_dict)
         # 提前终止
-        if args.use_early_stop:
+        if args.use_early_stop and not args.distributed:
             if early_stop.step(metrics):
                 break
-
-    # 清理进程
-    torch.distributed.destroy_process_group()
