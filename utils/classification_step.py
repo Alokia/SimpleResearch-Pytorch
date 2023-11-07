@@ -1,15 +1,35 @@
 from utils.engine import classification_train_one_epoch, classification_evaluate
 from argparse import ArgumentParser
 from utils.callbacks import ModelCheckpoint, EarlyStopping
+from utils.utils import seed_everything
+import torch
 
 
-def argument_parser(return_parser=False):
+def argument_parser(return_parser=True):
     parser = ArgumentParser()
+
+    # 分布式训练相关参数
+    parser.add_argument('--single_gpu', type=int, default=None, help='use a single gpu to train')
+    parser.add_argument('--distributed', action='store_true', default=False, help='whether to use distributed training')
+    # 开启的进程数(注意不是线程), 在单机中指使用GPU的数量
+    parser.add_argument('--world_size', type=int, default=1, help='number of distributed processes')
+    parser.add_argument('--dist_backend', default='gloo', type=str, help='distributed backend, win: gloo, linux: nccl')
+    parser.add_argument('--local_rank', type=int, default=0, help='node rank for distributed training')
+    parser.add_argument('--multi_gpu', type=str, default="0", help='use multiple cuda to train')
 
     # 训练相关参数
     parser.add_argument('--epochs', type=int, default=20, help='number of epochs')
     parser.add_argument('--topk', type=int, nargs='+', default=(1,), help='topk accuracy')
     parser.add_argument('--val_every_epoch', type=int, default=1, help='validate every n epoch')
+    parser.add_argument('--seed', type=int, default=None, help='random seed')
+    parser.add_argument('--lr', type=float, default=0.001, help='learning rate')
+
+    # 恢复训练相关参数
+    parser.add_argument('--resume', action="store_true", default=False, help='resume from checkpoint')
+    parser.add_argument('--resume_checkpoint', type=str, required=True, help='resume from checkpoint path')
+    parser.add_argument('--resume_model_only', action='store_true', default=False, help='resume model only')
+    parser.add_argument('--resume_callback_reset', action='store_true', default=False,
+                        help='whether to reset callback state')
 
     # 回调函数相关参数
     parser.add_argument('--use_cp', action='store_true', default=False, help='whether to use ModelCheckpoint')
@@ -36,14 +56,36 @@ def argument_parser(return_parser=False):
 
 
 def classification_step(train_loader, model, criterion, optimizer, device, val_loader=None,
-                        start_epoch=1, args=None):
+                        args=None, train_sampler=None):
+    # 是否固定随机种子
+    seed_everything(args.seed)
     # 自动保存训练过程
     model_cp = ModelCheckpoint(filepath=args.save_path, monitor=args.cp_monitor, mode=args.cp_mode,
                                save_best_only=args.not_save_best_only, save_freq=args.save_freq)
     # 提前终止
     early_stop = EarlyStopping(monitor=args.early_stop_monitor, mode=args.early_stop_mode, patience=args.patience)
 
+    # 如果恢复训练，加载相关权重
+    start_epoch = 1
+    if args.resume:
+        checkpoint = torch.load(args.resume_checkpoint, map_location='cpu')
+        model.load_state_dict(checkpoint['model'])
+        if not args.resume_model_only:
+            optimizer.load_state_dict(checkpoint['optimizer'])
+            start_epoch = checkpoint['start_epoch'] + 1
+            model_cp.load_state_dict(checkpoint['model_cp'])
+            early_stop.load_state_dict(checkpoint['early_stop'])
+            if args.resume_callback_reset:
+                model_cp.reset()
+                early_stop.reset()
+        del checkpoint
+
+    torch.backends.cudnn.benchmark = True
+
     for epoch in range(start_epoch, args.epochs + 1):
+        if args.distributed:
+            train_sampler.set_epoch(epoch)
+
         metrics = {}
         # 训练一个epoch
         train_loss, train_meters = classification_train_one_epoch(
