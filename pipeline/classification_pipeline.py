@@ -5,6 +5,9 @@ from utils.utils import seed_everything
 import torch
 
 
+# TODO: 测试分布式训练模型保存与恢复的功能
+# TODO: 添加日志功能，记录每个iter的训练结果，以便绘制训练曲线
+
 def argument_parser(return_parser=True):
     parser = ArgumentParser()
 
