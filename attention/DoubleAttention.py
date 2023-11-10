@@ -61,4 +61,4 @@ if __name__ == '__main__':
     x = torch.randn(3, 128, 56, 56)
     model = DoubleAttention(128, 128, 128, True)
     out = model(x)
-    print(out.shape)
+    print(out.shape)  # [3, 128, 56, 56]
