@@ -10,12 +10,14 @@ import numpy as np
 
 
 class EMSA(nn.Module):
-    def __init__(self, d_model: int, n_heads: int = 8, qkv_bias: bool = False,
-                 scale: float = None, attn_drop: float = 0., proj_drop: float = 0., sr_ratio: int = 1,
-                 apply_transform=False):
+    def __init__(self, d_model: int, dim_k: int = None, dim_v: int = None, n_heads: int = 8,
+                 qkv_bias: bool = False, scale: float = None, attn_drop: float = 0.,
+                 proj_drop: float = 0., sr_ratio: int = 1, apply_transform=False):
         """
         Parameters:
             d_model: 前面层的输出维度，即q,k,v的维度 (batch_size, nq, d_model), 一般为上一层特征图的通道数
+            dim_k: 每个head 的 k 的维度，如果为 None 则等于 d_model // n_heads
+            dim_v: 每个head 的 v 的维度，如果为 None 则等于 d_model // n_heads
             n_heads: heads 的数量
             qkv_bias: 是否使用qkv全连接层的偏置
             scale: 缩放因子，默认为 None
@@ -26,14 +28,15 @@ class EMSA(nn.Module):
         """
         super().__init__()
         self.n_heads = n_heads
-        self.head_dim = d_model // n_heads
-        self.scale = scale if scale is not None else self.head_dim ** -0.5
+        self.dim_k = dim_k if dim_k is not None else d_model // n_heads
+        self.dim_v = dim_v if dim_v is not None else d_model // n_heads
+        self.scale = scale if scale is not None else self.dim_k ** -0.5
 
-        self.q = nn.Linear(d_model, d_model, bias=qkv_bias)
-        self.k = nn.Linear(d_model, d_model, bias=qkv_bias)
-        self.v = nn.Linear(d_model, d_model, bias=qkv_bias)
+        self.q = nn.Linear(d_model, self.dim_k * n_heads, bias=qkv_bias)
+        self.k = nn.Linear(d_model, self.dim_k * n_heads, bias=qkv_bias)
+        self.v = nn.Linear(d_model, self.dim_v * n_heads, bias=qkv_bias)
         self.attn_drop = nn.Dropout(attn_drop)
-        self.proj = nn.Linear(d_model, d_model)
+        self.proj = nn.Linear(self.n_heads * self.dim_v, d_model)
         self.proj_drop = nn.Dropout(proj_drop)
 
         self.sr_ratio = sr_ratio
@@ -61,17 +64,17 @@ class EMSA(nn.Module):
         nq = height * width
         x = x.reshape(batch_size, d_model, nq).permute(0, 2, 1)  # (batch_size, nq, d_model)
 
-        # (batch_size, nq, d_model) -> (batch_size, nq, n_heads, head_dim) -> (batch_size, n_heads, nq, head_dim)
-        q = self.q(x).reshape(batch_size, nq, self.n_heads, self.head_dim).permute(0, 2, 1, 3)
+        # (batch_size, nq, d_model) -> (batch_size, nq, n_heads, dim_k) -> (batch_size, n_heads, nq, dim_k)
+        q = self.q(x).reshape(batch_size, nq, self.n_heads, self.dim_k).permute(0, 2, 1, 3)
 
         if self.sr_ratio > 1:
             x = x.permute(0, 2, 1).reshape(batch_size, d_model, height, width)
             x = self.sr(x).reshape(batch_size, d_model, -1).permute(0, 2, 1)
             x = self.sr_norm(x)  # (batch_size, oq, d_model)
-        # (batch_size, n_heads, head_dim, oq)
-        k = self.k(x).reshape(batch_size, -1, self.n_heads, self.head_dim).permute(0, 2, 3, 1)
-        # (batch_size, n_heads, oq, head_dim)
-        v = self.v(x).reshape(batch_size, -1, self.n_heads, self.head_dim).permute(0, 2, 1, 3)
+        # (batch_size, oq, d_model) -> (batch_size, oq, n_heads, dim_k) -> (batch_size, n_heads, dim_k, oq)
+        k = self.k(x).reshape(batch_size, -1, self.n_heads, self.dim_k).permute(0, 2, 3, 1)
+        # (batch_size, oq, d_model) -> (batch_size, oq, n_heads, dim_v) -> (batch_size, n_heads, oq, dim_v)
+        v = self.v(x).reshape(batch_size, -1, self.n_heads, self.dim_v).permute(0, 2, 1, 3)
 
         attn = (q @ k) * self.scale  # (batch_size, n_heads, nq, oq)
 
@@ -88,8 +91,8 @@ class EMSA(nn.Module):
             attn = attn.masked_fill(attn_mask, -np.inf)
 
         attn = self.attn_drop(attn)
-        # (batch_size, n_heads, nq, head_dim) -> (batch_size, nq, n_heads, head_dim) -> (batch_size, nq, d_model)
-        out = (attn @ v).transpose(1, 2).reshape(batch_size, nq, d_model)
+        # (batch_size, n_heads, nq, dim_v) -> (batch_size, nq, n_heads, dim_v) -> (batch_size, nq, n_heads * dim_v)
+        out = (attn @ v).transpose(1, 2).reshape(batch_size, nq, self.n_heads * self.dim_v)
         out = self.proj(out)  # (batch_size, nq, d_model)
         out = self.proj_drop(out)
         # (batch_size, channels, height, width)
@@ -99,6 +102,6 @@ class EMSA(nn.Module):
 
 if __name__ == '__main__':
     x = torch.randn(3, 512, 7, 7)
-    model = EMSA(512, n_heads=8, sr_ratio=2, apply_transform=True)
+    model = EMSA(512, dim_k=32, dim_v=32, n_heads=8, sr_ratio=2, apply_transform=True)
     out = model(x)
     print(out.shape)
