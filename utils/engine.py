@@ -2,6 +2,7 @@ import torch
 import lightning as L
 from timm.optim import create_optimizer
 from timm.scheduler import create_scheduler
+from timm.utils import accuracy
 from pl_bolts.optimizers.lr_scheduler import LinearWarmupCosineAnnealingLR
 
 
@@ -15,6 +16,16 @@ class ClassificationLightningModel(L.LightningModule):
     def forward(self, x):
         return self.model(x)
 
+    def _calculate_metrics(self, predicts, labels, mode, sync_dist=True):
+        num_classes = predicts.shape[1]
+        if num_classes <= 5:
+            acc1 = accuracy(predicts, labels, topk=(1,))
+            self.log(f"{mode}_acc", acc1, prog_bar=True, sync_dist=sync_dist)
+        else:
+            acc1, acc5 = accuracy(predicts, labels, topk=(1, 5))
+            self.log(f"{mode}_acc1", acc1, prog_bar=True, sync_dist=sync_dist)
+            self.log(f"{mode}_acc5", acc5, prog_bar=True, sync_dist=sync_dist)
+
     def _calculate_loss(self, batch, mode="train"):
         images, labels = batch
         predicts = self.model(images)
@@ -22,6 +33,10 @@ class ClassificationLightningModel(L.LightningModule):
 
         sync_dist = True if (torch.cuda.is_available() and torch.cuda.device_count() > 1) else False
         self.log(f"{mode}_loss", loss, prog_bar=True, sync_dist=sync_dist)
+
+        # 计算指标
+        if mode != "train":
+            self._calculate_metrics(predicts, labels, mode, sync_dist=sync_dist)
 
         return loss
 
