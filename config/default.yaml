@@ -1,0 +1,71 @@
+# 训练过程的部分参数配置
+fit:
+  # 回调函数的配置
+  callbacks:
+    # 模型保存的回调函数
+    ModelCheckpoint:
+      used: True
+      params:
+        dirpath: "./checkpoint/"  # 模型保存的文件夹位置
+        filename: "checkpoint-{epoch}-{val_loss:.4f}.ckpt"  # 模型保存的名称
+        monitor: "val_loss" # 监控的指标
+        mode: "min" # 监控指标的模式
+        verbose: False
+        save_weights_only: False  # 是否只保存模型权重，如果为 False，则optimizer、lr-scheduler等都会保存
+        save_top_k: 1 # 保存最好的几个模型
+        every_n_epochs: 1 # 每隔几个epoch监视一次指标
+
+    # 提前终止的回调函数
+    EarlyStopping:
+      used: False
+      params:
+        monitor: "val_loss" # 监控的指标
+        mode: "min" # 监控指标的模式
+        patience: 10  # 指标多少次不再改善时，终止训练
+        verbose: False
+
+    # tqdm进度条的回调函数
+    TQDMProgressBar:
+      used: True
+      params:
+        refresh_rate: 1 # 多少个batch刷新一次进度条
+
+  # logger的配置
+  logger:
+    used: True
+    params:
+      save_dir: "./logs/" # 日志保存的文件夹位置
+      version: "0.0.1" # 日志的版本，主要用于恢复上次的训练
+      offline: True # 是否离线保存日志
+      project: "lightning_classification_logs" # 项目名称
+      log_model: False # 是否保存模型
+
+  # trainer的配置
+  Trainer:
+    max_epochs: 100 # 训练多少个epoch
+    fast_dev_run: False # 只跑几次batch，用于debug，如果为False，则训练所有batch
+    accelerator: "gpu"
+    devices: 1 # 使用的设备。可以为设备列表，-1表示使用所有可用设备，auto表示自动检测
+    num_nodes: 1 # 用于分布式训练使用的GPU节点数量
+    sync_batchnorm: False # 如果是分布式训练，则需要设置为True
+    strategy: "auto"
+    gradient_clip_val: 1.0 # 梯度裁剪的阈值
+    precision: "32" # 训练精度，64、32、16、bf16
+    enable_checkpointing: True # 如果没有使用ModelCheckpoint回调函数，是否启用一个默认的ModelCheckpoint
+    enable_progress_bar: True # 是否启用tqdm进度条
+    benchmark: False # 是否启用benchmark
+    deterministic: False # 是否启用deterministic
+
+  # 优化器的配置
+  optimizer:
+    optimizer:
+      opt: "adam"  # 优化器的名称，可以为adam、adamw、sgd、cosine、nesterov、momentum、sgdp等等
+      lr: 0.001 # 学习率
+      weight_decay: 0.0 # 权重衰减
+      momentum: 0.9 # 动量
+    scheduler:
+      sched: "cosine" # 学习率衰减的策略
+      warmup_epochs: 20 # 线性预热的epoch数量
+      max_epochs: 100 # 最大多少个epoch
+      warmup_start_lr: 0.0001 # warmup的初始学习率
+      eta_min: 0.000001 # 学习率衰减的最小值
