@@ -7,9 +7,9 @@ fit:
       used: True
       params:
         dirpath: "./checkpoint/"  # 模型保存的文件夹位置
-        filename: "checkpoint-{epoch}-{val_loss:.4f}.ckpt"  # 模型保存的名称
-        monitor: "val_loss" # 监控的指标
-        mode: "min" # 监控指标的模式
+        filename: "checkpoint-{epoch}-{val_loss:.4f}"  # 模型保存的名称
+        monitor: "val_acc1" # 监控的指标
+        mode: "max" # 监控指标的模式
         verbose: False
         save_weights_only: False  # 是否只保存模型权重，如果为 False，则optimizer、lr-scheduler等都会保存
         save_top_k: 1 # 保存最好的几个模型
@@ -19,9 +19,9 @@ fit:
     EarlyStopping:
       used: False
       params:
-        monitor: "val_loss" # 监控的指标
-        mode: "min" # 监控指标的模式
-        patience: 10  # 指标多少次不再改善时，终止训练
+        monitor: "val_acc1" # 监控的指标
+        mode: "max" # 监控指标的模式
+        patience: 100  # 指标多少次不再改善时，终止训练
         verbose: False
 
     # tqdm进度条的回调函数

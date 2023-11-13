@@ -1,4 +1,3 @@
-from utils.engine import ClassificationLightningModel
 from argparse import ArgumentParser
 from lightning.pytorch.callbacks import ModelCheckpoint, EarlyStopping, TQDMProgressBar
 from lightning.pytorch.loggers import WandbLogger
