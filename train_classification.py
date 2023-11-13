@@ -52,7 +52,7 @@ def main(args):
 if __name__ == '__main__':
     parser = parser_args(return_args=False)
     parser.add_argument('--batch_size', type=int, default=16, help='batch size')
-    parser.add_argument('--num_workers', type=int, default=0, help='number of workers')
+    parser.add_argument('--num_workers', type=int, default=8, help='number of workers')
     parser.add_argument('--num_classes', type=int, default=6, help='number of classes')
     parser.add_argument('--model_mode', type=int, default=50, help='model mode')
     parser.add_argument('--train_folder', type=str, default='G:\\datasets\\Intel Image Classification\\seg_train',
