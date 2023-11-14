@@ -197,5 +197,6 @@ class LightningTQDMProgressBar(TQDMProgressBar):
             leave=True,
             dynamic_ncols=True,
             file=sys.stdout,
+            colour="#f5b087"
         )
         return bar
