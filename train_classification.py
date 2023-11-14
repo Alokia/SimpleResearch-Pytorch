@@ -7,6 +7,9 @@ from architecture.classification.CBAM_BAM_with_ResNet import resnet_with_bam_and
 from pipeline.classification_pipeline import parser_args, create_trainer
 from utils.engine import ClassificationLightningModel
 from utils.utils import load_yaml_with_omegaconf
+import warnings
+
+warnings.filterwarnings("ignore")
 
 
 def main(args):
