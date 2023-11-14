@@ -64,8 +64,6 @@ fit:
       weight_decay: 0.0 # 权重衰减
       momentum: 0.9 # 动量
     scheduler:
-      sched: "cosine" # 学习率衰减的策略
-      warmup_epochs: 20 # 线性预热的epoch数量
-      max_epochs: 100 # 最大多少个epoch
-      warmup_start_lr: 0.0001 # warmup的初始学习率
-      eta_min: 0.000001 # 学习率衰减的最小值
+      T_0: 5  # 学习率第一次回到初始值的epoch数
+      T_mult: 2 # 后续学习率回到初始值的epoch数 T_0 的倍数
+      eta_min: 0.000001 # 学习率的最小值

@@ -1,22 +1,13 @@
 import torch
 import lightning as L
 from timm.optim import create_optimizer
-from timm.scheduler import create_scheduler
 from timm.utils import accuracy
-from pl_bolts.optimizers.lr_scheduler import LinearWarmupCosineAnnealingLR
+from torch.optim.lr_scheduler import CosineAnnealingWarmRestarts
 
 
 def configure_optimizers(opt_params, parameters):
     optimizer = create_optimizer(opt_params.optimizer, parameters)
-    if opt_params.scheduler.sched == "cosine":
-        scheduler = LinearWarmupCosineAnnealingLR(
-            optimizer, warmup_epochs=opt_params.scheduler.warmup_epochs,
-            max_epochs=opt_params.scheduler.max_epochs,
-            warmup_start_lr=opt_params.scheduler.warmup_start_lr,
-            eta_min=opt_params.scheduler.eta_min
-        )
-    else:
-        scheduler, _ = create_scheduler(opt_params.scheduler, optimizer)
+    scheduler = CosineAnnealingWarmRestarts(optimizer, **opt_params.scheduler)
     return [optimizer], [scheduler]
 
 
