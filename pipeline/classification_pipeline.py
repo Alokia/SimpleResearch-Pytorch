@@ -1,5 +1,6 @@
 from argparse import ArgumentParser
-from lightning.pytorch.callbacks import ModelCheckpoint, EarlyStopping, TQDMProgressBar
+from lightning.pytorch.callbacks import ModelCheckpoint, EarlyStopping
+from utils.callbacks import LightningTQDMProgressBar
 from lightning.pytorch.loggers import WandbLogger
 import lightning as L
 
@@ -24,9 +25,9 @@ def create_callbacks(params):
 
     if params.TQDMProgressBar.used:
         if "params" in params.TQDMProgressBar:
-            tqdm_progress_bar = TQDMProgressBar(**params.TQDMProgressBar.params)
+            tqdm_progress_bar = LightningTQDMProgressBar(**params.TQDMProgressBar.params)
         else:
-            tqdm_progress_bar = TQDMProgressBar()
+            tqdm_progress_bar = LightningTQDMProgressBar()
         callbacks.append(tqdm_progress_bar)
 
     if len(callbacks) == 0:

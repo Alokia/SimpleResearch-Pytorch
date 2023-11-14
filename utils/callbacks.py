@@ -1,6 +1,8 @@
 import torch
 import math
 from pathlib2 import Path
+from lightning.pytorch.callbacks.progress.tqdm_progress import Tqdm, TQDMProgressBar
+import sys
 
 
 class EarlyStopping(object):
@@ -177,3 +179,23 @@ class ModelCheckpoint(object):
 
         self.__times += 1
         return flag
+
+
+class LightningTQDMProgressBar(TQDMProgressBar):
+    """
+    重写TQDMProgressBar，修复其在验证时进度条不断换行显示的问题
+    """
+
+    def __init__(self, refresh_rate: int = 1, process_position: int = 0):
+        super().__init__(refresh_rate, process_position)
+
+    def init_validation_tqdm(self) -> Tqdm:
+        bar = Tqdm(
+            desc=self.validation_description,
+            position=0,  # 避免验证时进度条不断换行显示
+            disable=self.is_disabled,
+            leave=True,
+            dynamic_ncols=True,
+            file=sys.stdout,
+        )
+        return bar
