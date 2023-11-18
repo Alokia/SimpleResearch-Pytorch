@@ -24,7 +24,7 @@ class ClassificationLightningModel(L.LightningModule):
     def _calculate_metrics(self, predicts, labels, mode, sync_dist=True):
         num_classes = predicts.shape[1]
         if num_classes <= 5:
-            acc1 = accuracy(predicts, labels, topk=(1,))
+            acc1 = accuracy(predicts, labels, topk=(1,))[0]
             self.log(f"{mode}_acc1", acc1, prog_bar=True, sync_dist=sync_dist)
         else:
             acc1, acc5 = accuracy(predicts, labels, topk=(1, 5))
